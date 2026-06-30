@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\01Parks_11.js' -TotalCount 30 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\02ParkVicinity_10.js' -TotalCount 20 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\00BProvinces_1.js' -TotalCount 5 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\00CWater_3.js' -TotalCount 3 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\102Cemetery_4.js' -TotalCount 3 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\101Golf_5.js' -TotalCount 3 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\03BLibraries_7.js' -TotalCount 3 | Out-String\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\layers\\\\03DMalls_8.js' -TotalCount 3 | Out-String\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(powershell -Command \"\\(Get-Command python -ErrorAction SilentlyContinue\\).Source; \\(Get-Command python3 -ErrorAction SilentlyContinue\\).Source; \\(Get-Command node -ErrorAction SilentlyContinue\\).Source\")",
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\Admin\\\\Desktop\\\\Webmap_Parks01-01\\\\ParksMap_GMA.html'\\).Count\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
