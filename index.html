@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/png" href="images/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Parks in the Greater Manila Area — Urban Geospatial Analysis. WTA Labs / GeoCite.">
 
@@ -189,15 +190,32 @@ html, body {
 #app { position: fixed; inset: 0; }
 #map { position: absolute; inset: 0; width: 100%; height: 100%; }
 
+/* ══ Q-TIP ════════════════════════════════════════════════ */
+#q-tip { position: fixed; z-index: 9999; display: none; pointer-events: none;
+  background: #fff; border: 1px solid rgba(0,0,0,.1); border-radius: 8px;
+  padding: 8px 11px; font-size: .71rem; color: var(--txt-mid); line-height: 1.6;
+  max-width: 220px; box-shadow: 0 4px 20px rgba(0,0,0,.14); }
+.qm { display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: rgba(26,158,110,0.10); border: 1px solid rgba(26,158,110,.25);
+  font-size: .56rem; color: var(--acc); cursor: help;
+  font-family: var(--f-mono); font-weight: 700; flex-shrink: 0; margin-left: 4px; vertical-align: middle; }
+
 /* ══ GEOCITE LOGO — upper left ═══════════════════════════ */
 #geocite-logo {
   position: absolute; top: 14px; left: 14px; z-index: 300;
-  pointer-events: none; user-select: none;
+  display: flex; align-items: center; gap: 6px;
+  pointer-events: auto; user-select: none; text-decoration: none;
   opacity: 0; transform: translateY(-6px);
   transition: opacity .5s var(--ease), transform .5s var(--ease);
 }
 #geocite-logo.in { opacity: 1; transform: none; }
-#geocite-logo img { height: 30px; width: auto; object-fit: contain; display: block; }
+#geocite-logo img { height: 38px; width: auto; object-fit: contain; display: block; }
+#geocite-logo .gp-txt {
+  font-family: var(--f-mono); font-size: .6rem; font-weight: 700;
+  letter-spacing: .10em; text-transform: uppercase;
+  color: var(--acc); opacity: .85;
+}
 
 /* ══ LEFT COLUMN ══════════════════════════════════════════ */
 #lp-wrap {
@@ -240,6 +258,30 @@ html, body {
 #about-panel .about-body {
   padding: 10px 14px;
   font-size: .76rem; color: var(--txt-mid); line-height: 1.65;
+}
+
+/* Scale description panel */
+#scale-desc-panel {
+  width: 100%; flex-shrink: 0;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-bdr);
+  border-radius: var(--r); box-shadow: var(--shdw);
+  overflow: hidden; pointer-events: auto;
+}
+#scale-desc-panel .sd-hd {
+  font-family: var(--f-mono); font-size: .54rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--acc);
+  padding: 9px 14px 7px; border-bottom: 1px solid var(--bdr);
+  display: block;
+}
+#scale-desc-panel .sd-title {
+  font-family: var(--f-display); font-weight: 800;
+  font-size: .92rem; color: var(--txt); padding: 9px 14px 4px;
+}
+#scale-desc-panel .sd-body {
+  padding: 0 14px 11px;
+  font-size: .74rem; color: var(--txt-mid); line-height: 1.6;
 }
 
 /* Layers panel */
@@ -353,7 +395,7 @@ html, body {
 
 /* ══ BASE LAYER PILL ════════════════════════════════════ */
 #blp {
-  position: absolute; top: 68px; left: 50%;
+  position: absolute; top: 14px; left: 50%;
   display: flex; align-items: center; gap: 3px; padding: 5px 12px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
@@ -534,7 +576,7 @@ html, body {
 #park-clear-btn:hover { color: var(--txt); }
 #park-clear-btn.vis { display: flex; align-items: center; }
 #park-autocomplete {
-  position: absolute; top: calc(100% + 6px); left: 0; right: 8px;
+  position: absolute; bottom: calc(100% + 6px); top: auto; left: 0; right: 8px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-bdr);
@@ -784,12 +826,12 @@ html, body {
   <!-- MAP -->
   <div id="zoom-fade"></div>
   <div id="map" aria-label="Interactive map"></div>
+  <div id="q-tip"></div>
 
   <!-- GEOCITE LOGO -->
-  <div id="geocite-logo" aria-label="GeoCite">
-    <img src="images/GeoCite.svg" alt="GeoCite"
-         onerror="this.style.display='none'">
-  </div>
+  <a id="geocite-logo" href="https://www.wtalabs.ph/geocite" target="_blank" rel="noopener" aria-label="GeoPowered by GeoCite">
+    <img src="images/GeoPowered.svg" alt="GeoPowered by GeoCite" onerror="this.style.display='none'">
+  </a>
 
   <!-- LEFT PANELS -->
   <div id="lp-wrap" class="offscreen">
@@ -804,6 +846,13 @@ html, body {
       </div>
     </aside>
 
+    <!-- Scale description panel -->
+    <aside id="scale-desc-panel" aria-label="Scale description">
+      <span class="sd-hd">Viewing Mode</span>
+      <div class="sd-title" id="sd-title">Parks Scale</div>
+      <div class="sd-body" id="sd-body">Individual parks mapped across the Greater Manila Area. Hover a park to preview its attributes, or click to lock and explore full details including tree cover, vicinity context, and city comparisons.</div>
+    </aside>
+
     <aside id="lp" aria-label="Layer controls">
 
       <!-- Layers -->
@@ -813,7 +862,7 @@ html, body {
         <div class="lyr">
           <div class="lyr-info">
             <span class="leg-sq" style="background:#6db33f;border-color:#4f8f25"></span>
-            <span class="lyr-name">Golf Courses</span>
+            <span class="lyr-name">Golf Courses <span class="qm" data-tip="Golf courses and country clubs within the Greater Manila Area.">?</span></span>
           </div>
           <label class="tog" aria-label="Toggle Golf Courses layer">
             <input type="checkbox" id="tog-golf">
@@ -824,7 +873,7 @@ html, body {
         <div class="lyr">
           <div class="lyr-info">
             <span class="leg-sq" style="background:#9b7d9b;border-color:#7a5e7a"></span>
-            <span class="lyr-name">Cemeteries</span>
+            <span class="lyr-name">Cemeteries <span class="qm" data-tip="Cemetery and memorial park footprints across the region.">?</span></span>
           </div>
           <label class="tog" aria-label="Toggle Cemeteries layer">
             <input type="checkbox" id="tog-cemetery">
@@ -835,7 +884,7 @@ html, body {
         <div class="lyr">
           <div class="lyr-info">
             <span class="leg-sq" style="background:#7ec8c8;border-color:#5ba8a8"></span>
-            <span class="lyr-name">Sports Pitches</span>
+            <span class="lyr-name">Sports Pitches <span class="qm" data-tip="Sports fields, pitches, and recreational courts.">?</span></span>
           </div>
           <label class="tog" aria-label="Toggle Sports Pitches layer">
             <input type="checkbox" id="tog-pitch">
@@ -846,7 +895,7 @@ html, body {
         <div class="lyr">
           <div class="lyr-info">
             <span class="leg-sq" style="background:#4a90d9;border-color:#2e6fad"></span>
-            <span class="lyr-name">Libraries</span>
+            <span class="lyr-name">Libraries <span class="qm" data-tip="Public and university library buildings.">?</span></span>
           </div>
           <label class="tog" aria-label="Toggle Libraries layer">
             <input type="checkbox" id="tog-libraries">
@@ -857,7 +906,7 @@ html, body {
         <div class="lyr">
           <div class="lyr-info">
             <span class="leg-sq" style="background:#e05a6a;border-color:#c03a4a"></span>
-            <span class="lyr-name">Malls</span>
+            <span class="lyr-name">Malls <span class="qm" data-tip="Shopping malls and large commercial centers.">?</span></span>
           </div>
           <label class="tog" aria-label="Toggle Malls layer">
             <input type="checkbox" id="tog-malls">
@@ -868,26 +917,10 @@ html, body {
         <div class="lyr">
           <div class="lyr-info">
             <span class="leg-circ" style="background:#f5a623;border-color:#c07a10"></span>
-            <span class="lyr-name">Amenities</span>
+            <span class="lyr-name">Amenities <span class="qm" data-tip="Public amenity facilities such as courts, plazas, and open spaces.">?</span></span>
           </div>
           <label class="tog" aria-label="Toggle Amenities layer">
             <input type="checkbox" id="tog-amenities">
-            <span class="tog-track"><span class="tog-thumb"></span></span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Base overlays -->
-      <div class="lp-sec">
-        <div class="lp-hd">Base Layers</div>
-
-        <div class="lyr">
-          <div class="lyr-info">
-            <span class="leg-sq" style="background:rgba(40,140,210,0.45);border-color:rgba(40,140,210,0.7)"></span>
-            <span class="lyr-name">Water Bodies</span>
-          </div>
-          <label class="tog" aria-label="Toggle Water layer">
-            <input type="checkbox" id="tog-water" checked>
             <span class="tog-track"><span class="tog-thumb"></span></span>
           </label>
         </div>
@@ -898,6 +931,24 @@ html, body {
       </div>
 
     </aside>
+
+    <!-- Base Layers panel -->
+    <aside id="lp" style="flex:none" aria-label="Base layer controls">
+      <div class="lp-sec">
+        <div class="lp-hd">Base Layers</div>
+        <div class="lyr">
+          <div class="lyr-info">
+            <span class="leg-sq" style="background:rgba(40,140,210,0.45);border-color:rgba(40,140,210,0.7)"></span>
+            <span class="lyr-name">Water Bodies <span class="qm" data-tip="Rivers, lakes, reservoirs, and other water bodies.">?</span></span>
+          </div>
+          <label class="tog" aria-label="Toggle Water layer">
+            <input type="checkbox" id="tog-water" checked>
+            <span class="tog-track"><span class="tog-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
   </div>
 
   <!-- BASE LAYER PILL -->
@@ -966,7 +1017,6 @@ html, body {
     <span id="coords">–°N, –°E</span>
   </div>
 
-  <div id="data-src">OpenStreetMap · PSA · Remote Sensing</div>
 
   <div id="corner-logo">
     <a href="https://www.wtalabs.ph" target="_blank" rel="noopener noreferrer" aria-label="WTA Labs">
@@ -1047,8 +1097,8 @@ const fmt = v => {
 };
 const fmtArea = sqm => {
   if (sqm == null || isNaN(+sqm)) return '—';
-  const ha = +sqm / 10000;
-  return ha >= 1 ? ha.toFixed(2) + ' ha' : (+sqm).toFixed(0) + ' m²';
+  const v = +sqm;
+  return (v >= 1000 ? v.toLocaleString('en', {maximumFractionDigits: 0}) : v.toFixed(2)) + ' m²';
 };
 const fmtPct = v => v == null || isNaN(+v) ? '—' : (+v * 100).toFixed(1) + '%';
 
@@ -1096,7 +1146,6 @@ function computeParkStats() {
   PARK_STATS = {
     area: mkStat(extract('AreaSQM')),
     tree: mkStat(extract('TreeCover_Percentage', 100)),  /* 0-1 → 0-100 */
-    temp: mkStat(extract('Tmean_Celsius')),
   };
 
   /* Per-municipality: total park area for each city */
@@ -1109,8 +1158,9 @@ function computeParkStats() {
 }
 
 /* Render a histogram distribution chart (svg bars + current value marker) */
-function mChart(stat, curVal, title) {
+function mChart(stat, curVal, title, fL) {
   if (!stat) return '';
+  if (!fL) fL = v => v.toFixed(2);
   const W = 220, H = 38, N = stat.bins.length, bW = W / N;
   const mx = Math.max(...stat.bins) || 1;
   const cB = curVal != null ? Math.min(Math.floor(((curVal - stat.min) / stat.range) * N), N - 1) : -1;
@@ -1123,7 +1173,6 @@ function mChart(stat, curVal, title) {
     const x = Math.min(((curVal - stat.min) / stat.range) * W, W - 1).toFixed(1);
     marker = `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#1a9e6e" stroke-width="1.5" stroke-dasharray="3,2"/>`;
   }
-  const fL = v => v >= 10000 ? (v / 10000).toFixed(1) + ' ha' : v >= 1 ? v.toFixed(1) : v.toFixed(2);
   return `<div class="chart-wrap">
     <div class="chart-ttl">${title}</div>
     <svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${bars}${marker}</svg>
@@ -1437,9 +1486,12 @@ map.on('load', () => {
   /* ── Municipalities ── */
   map.addLayer({ id: 'lyr-munic-fill', type: 'fill', source: 'src-munic', layout: { visibility: 'visible' },
     paint: { 'fill-color': 'rgba(100,100,100,0.03)', 'fill-opacity': 1 } });
+  map.addLayer({ id: 'lyr-munic-line-casing', type: 'line', source: 'src-munic', layout: { visibility: 'none' },
+    paint: { 'line-color': 'rgba(255,255,255,0.88)',
+      'line-width': ['case',['boolean',['feature-state','selected'],false],6,['boolean',['feature-state','hover'],false],4,3] } });
   map.addLayer({ id: 'lyr-munic-line', type: 'line', source: 'src-munic', layout: { visibility: 'visible' },
     paint: { 'line-color': 'rgba(90,90,90,0.3)', 'line-width': 1.0 } });
-  map.addLayer({ id: 'lyr-munic-lbl', type: 'symbol', source: 'src-munic', minzoom: 10,
+  map.addLayer({ id: 'lyr-munic-lbl', type: 'symbol', source: 'src-munic', minzoom: 10, maxzoom: 12,
     layout: { visibility: 'visible',
       'text-field': ['coalesce', ['get', 'Mun_Name'], ['get', 'name'], ''],
       'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 14, 12],
@@ -1574,6 +1626,7 @@ map.on('load', () => {
   updateScalebar();
   setupInteractions();
   setupUI();
+  hideBasemapLocalLabels();
 });
 
 /* ════════════════════════════════════════════════════════════
@@ -1645,7 +1698,7 @@ function buildTip(p, e) {
     `<div class="ht-title">${name}</div>` +
     (mun ? `<div class="ht-row"><span class="ht-key">City</span><span class="ht-val">${mun}</span></div>` : '') +
     `<div class="ht-row"><span class="ht-key">Area</span><span class="ht-val">${area}</span></div>` +
-    `<div class="ht-row"><span class="ht-key">Tree Cover</span><span class="ht-val">${tree}</span></div>` +
+    `<div class="ht-row"><span class="ht-key">Park Tree Cover %</span><span class="ht-val">${tree}</span></div>` +
     `<div class="ht-hint">Click to view full attributes</div>`;
   tip.classList.add('vis');
   moveTip(e);
@@ -1677,7 +1730,6 @@ function showPanel(props, layerLabel) {
   const type = toSentence(typeRaw);
   const tree = fmtPct(props.TreeCover_Percentage);
   const can  = props.Canopy_mean != null ? (+props.Canopy_mean).toFixed(2) : '—';
-  const temp = props.Tmean_Celsius != null ? (+props.Tmean_Celsius).toFixed(2) + ' °C' : '—';
   const cmp  = props.Compactness != null ? (+props.Compactness).toFixed(3) : '—';
   const pop  = props.Pop2015 != null ? (+props.Pop2015).toLocaleString() : (props.F2020_Cens || '—');
 
@@ -1686,56 +1738,50 @@ function showPanel(props, layerLabel) {
   const schC  = props.School_Count;
   const popS  = props.Pop_sum;
   const tCpct = props.TreeCoverCity_Percentage;
-  const citT  = props.CityLST_mean != null ? (+props.CityLST_mean).toFixed(1) + ' °C' : null;
 
   /* Distribution values */
   const areaSQM   = props.AreaSQM != null ? +props.AreaSQM : null;
   const treePctV  = props.TreeCover_Percentage != null ? +props.TreeCover_Percentage * 100 : null;
-  const tempV     = props.Tmean_Celsius != null ? +props.Tmean_Celsius : null;
 
   let html = `
     <div class="prop-layer">${name}<div class="pl-sub">${layerLabel || 'Park'} · ${mun}</div></div>
     <div class="stat-grid">
-      <div class="stat-box"><div class="stat-val">${area}</div><div class="stat-key">Park Area</div></div>
-      <div class="stat-box"><div class="stat-val">${tree}</div><div class="stat-key">Tree Cover</div></div>
-      <div class="stat-box"><div class="stat-val">${temp}</div><div class="stat-key">Mean Temp.</div></div>
-      <div class="stat-box"><div class="stat-val">${type}</div><div class="stat-key">Type / Remarks</div></div>
+      <div class="stat-box"><div class="stat-val">${area}</div><div class="stat-key">Park Area ${qmark('Total footprint of this park in square meters.')}</div></div>
+      <div class="stat-box"><div class="stat-val">${tree}</div><div class="stat-key">Park Tree Cover % ${qmark('Percentage of the park covered by tree canopy, derived from remote sensing data.')}</div></div>
+      <div class="stat-box"><div class="stat-val">${type}</div><div class="stat-key">Type / Remarks ${qmark('Park classification or primary land use type.')}</div></div>
     </div>
     <div class="prop-sec">Location</div>
-    <div class="prop-row"><span class="prop-key">Municipality</span><span class="prop-val">${mun}</span></div>
-    <div class="prop-row"><span class="prop-key">Barangay</span><span class="prop-val">${bgy}</span></div>
+    <div class="prop-row"><span class="prop-key">Municipality ${qmark('City or municipality where this park is located.')}</span><span class="prop-val">${mun}</span></div>
+    <div class="prop-row"><span class="prop-key">Barangay ${qmark('Smallest administrative unit (village/district) within the city where this park sits.')}</span><span class="prop-val">${bgy}</span></div>
     <div class="prop-sec">Park Metrics</div>
-    <div class="prop-row"><span class="prop-key">Area (sqm)</span><span class="prop-val">${areaSQM != null ? areaSQM.toFixed(2) : '—'}</span></div>
-    <div class="prop-row"><span class="prop-key">Compactness</span><span class="prop-val">${cmp}</span></div>
-    <div class="prop-row"><span class="prop-key">Canopy mean</span><span class="prop-val">${can}</span></div>
-    <div class="prop-row"><span class="prop-key">Tree cover %</span><span class="prop-val hi">${tree}</span></div>
+    <div class="prop-row"><span class="prop-key">Area ${qmark('Total park footprint in square meters.')}</span><span class="prop-val">${fmtArea(areaSQM)}</span></div>
+    <div class="prop-row"><span class="prop-key">Compactness ${qmark('Shape compactness index (0–1). Values closer to 1 indicate a more circular, compact shape.')}</span><span class="prop-val">${cmp}</span></div>
+    <div class="prop-row"><span class="prop-key">Canopy mean ${qmark('Mean canopy cover value derived from remote sensing. Higher values indicate denser tree cover.')}</span><span class="prop-val">${can}</span></div>
+    <div class="prop-row"><span class="prop-key">Park Tree Cover % ${qmark('Percentage of the park\'s area covered by tree canopy.')}</span><span class="prop-val hi">${tree}</span></div>
     ${treePctV != null ? pctBar(treePctV, '#1a9e6e') : ''}
-    <div class="prop-row"><span class="prop-key">Mean temp.</span><span class="prop-val">${temp}</span></div>
   `;
 
   /* Distribution charts */
   if (PARK_STATS) {
-    html += mChart(PARK_STATS.area, areaSQM, 'Park Area Distribution');
-    html += mChart(PARK_STATS.tree, treePctV, 'Tree Cover Distribution');
-    html += mChart(PARK_STATS.temp, tempV, 'Temp. Distribution');
+    html += mChart(PARK_STATS.area, areaSQM, `Park Area Distribution ${qmark('Where this park ranks among all mapped parks by area.')}`, v => (v >= 1000 ? v.toLocaleString('en', {maximumFractionDigits:0}) : v.toFixed(0)) + ' m²');
+    html += mChart(PARK_STATS.tree, treePctV, `Park Tree Cover Distribution ${qmark('Where this park ranks by tree canopy cover across all parks in the region.')}`, v => v.toFixed(1) + '%');
   }
 
   if (props.SumArea_perMuni != null) {
     html += `
       <div class="prop-sec">City Context</div>
-      <div class="prop-row"><span class="prop-key">Parks in city</span><span class="prop-val">${fmt(props.Count_perMuni)}</span></div>
-      <div class="prop-row"><span class="prop-key">Total park area (city)</span><span class="prop-val">${fmtArea(props.SumArea_perMuni)}</span></div>
-      <div class="prop-row"><span class="prop-key">Population (bgy, 2015)</span><span class="prop-val">${pop}</span></div>
+      <div class="prop-row"><span class="prop-key">Parks in city ${qmark('Total number of park features mapped within this park\'s city or municipality.')}</span><span class="prop-val">${fmt(props.Count_perMuni)}</span></div>
+      <div class="prop-row"><span class="prop-key">Total park area (city) ${qmark('Sum of all park footprints in square meters within this city or municipality.')}</span><span class="prop-val">${fmtArea(props.SumArea_perMuni)}</span></div>
+      <div class="prop-row"><span class="prop-key">Population (bgy, 2015) ${qmark('Resident population of this park\'s barangay based on the 2015 PSA census.')}</span><span class="prop-val">${pop}</span></div>
     `;
   }
   if (amenC != null || schC != null) {
     html += `
       <div class="prop-sec">Vicinity (500m)</div>
-      ${amenC != null ? `<div class="prop-row"><span class="prop-key">Amenities</span><span class="prop-val">${fmt(amenC)}</span></div>` : ''}
-      ${schC  != null ? `<div class="prop-row"><span class="prop-key">Schools</span><span class="prop-val">${fmt(schC)}</span></div>` : ''}
-      ${popS  != null ? `<div class="prop-row"><span class="prop-key">Population (500m)</span><span class="prop-val">${(+popS).toLocaleString('en',{maximumFractionDigits:0})}</span></div>` : ''}
-      ${tCpct != null ? `<div class="prop-row"><span class="prop-key">City tree cover</span><span class="prop-val hi">${fmtPct(tCpct)}</span></div>` : ''}
-      ${citT  != null ? `<div class="prop-row"><span class="prop-key">City mean temp.</span><span class="prop-val">${citT}</span></div>` : ''}
+      ${amenC != null ? `<div class="prop-row"><span class="prop-key">Amenities ${qmark('Number of public amenity facilities (courts, plazas, open spaces) within 500m of this park.')}</span><span class="prop-val">${fmt(amenC)}</span></div>` : ''}
+      ${schC  != null ? `<div class="prop-row"><span class="prop-key">Schools ${qmark('Number of schools within 500m of this park.')}</span><span class="prop-val">${fmt(schC)}</span></div>` : ''}
+      ${popS  != null ? `<div class="prop-row"><span class="prop-key">Population (500m) ${qmark('Estimated resident population living within 500m of this park.')}</span><span class="prop-val">${(+popS).toLocaleString('en',{maximumFractionDigits:0})}</span></div>` : ''}
+      ${tCpct != null ? `<div class="prop-row"><span class="prop-key">City tree cover ${qmark('Overall tree canopy cover percentage for this park\'s city or municipality.')}</span><span class="prop-val hi">${fmtPct(tCpct)}</span></div>` : ''}
     `;
   }
 
@@ -1749,6 +1795,14 @@ function showPanel(props, layerLabel) {
 function showPointPanel(props, layerLabel) {
   const name = props.name || props.Name || '(' + layerLabel + ')';
   let html = `<div class="prop-layer">${name}<div class="pl-sub">${layerLabel}</div></div>`;
+  const _TYPE_SKIP = {
+    'Golf Course': new Set(['osm_type','type','Reg_Name','PHCode_Pro','Pro_Name','PHCode_Mun','Mun_Name','Province','MuniCity','AreaSQM_perMuni','Count_perMuni','AreaSQM_perProv','Count_perProv','TreeCover_count','TreeCover_sum','TreeCover_mean','TreeCover_median','TreeCover_min']),
+    'Cemetery':    new Set(['osm_type','type','PHCode_Reg','Reg_Name','PHCode_Pro','Pro_Name','PHCode_Mun','Mun_Name','Province','MuniCity','Canopy_count','Canopy_sum','Canopy_mean','Canopy_median','Canopy_max','Canopy_range','CanopyPerAreaSQM','AreaSQM_perMun','AreaSQM_perProv','Count_perMun']),
+    'Mall':        new Set(['osm_type','Reg_Name','PHCode_Pro','Pro_Name','PHCode_Mun','Mun_Name','Province','MuniCity','Mall_AreaSQM_Muni','GFA_Approx_Mall','GFA_Muni']),
+    'Amenity':     new Set(['osm_type']),
+    'Library':     new Set(['osm_type']),
+  };
+  const typeSkip = _TYPE_SKIP[layerLabel] || new Set();
   const skip = new Set([
     'fid', 'fid_2', 'fid_3', 'osm_id', 'full_id', 'path', 'layer',
     'Reg_Code', 'Pro_Code', 'Mun_Code', 'Bgy_Code',
@@ -1756,13 +1810,19 @@ function showPointPanel(props, layerLabel) {
     'highway', 'boundary', 'place', 'waterway', 'railway',
     '@id', '@version', 'source', 'source:date', 'created_by'
   ]);
-  const keyLabel = k => toSentence(k.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2'));
+  const _AREA_KEYS = new Set(['AreaSQM', 'AreaSQm']);
+  const keyLabel = k => {
+    if (_AREA_KEYS.has(k)) return 'Area m²';
+    return toSentence(k.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2'));
+  };
   const entries = Object.entries(props).filter(([k, v]) =>
-    !skip.has(k) && v !== null && v !== '' && !k.startsWith('_') && !k.startsWith('@')
+    !skip.has(k) && !typeSkip.has(k) && v !== null && v !== '' && !k.startsWith('_') && !k.startsWith('@')
   ).slice(0, 22);
   html += '<div class="props-wrap">';
   entries.forEach(([k, v]) => {
-    html += `<div class="prop-row"><span class="prop-key">${keyLabel(k)}</span><span class="prop-val">${toSentence(String(v))}</span></div>`;
+    const label = keyLabel(k);
+    const display = _AREA_KEYS.has(k) ? fmtArea(+v) : toSentence(String(v));
+    html += `<div class="prop-row"><span class="prop-key">${label}</span><span class="prop-val">${display}</span></div>`;
   });
   html += '</div>';
   const body = document.getElementById('rp-body');
@@ -1817,6 +1877,8 @@ function setupInteractions() {
     if (!S.locked) { clearHover(); clearPanel(); clearHovContext(); }
   });
   map.on('click', 'lyr-parks-dot', e => {
+    /* lyr-parks-fill fires first and already handled this click — skip to avoid double-clear */
+    if (_parkClickHandled) return;
     if (!e.features.length) return;
     _parkClickHandled = true;
     const f = e.features[0];
@@ -1841,12 +1903,15 @@ function setupInteractions() {
     if (!S.locked) clearPanel();
   });
   map.on('click', 'lyr-mun-parks-dot', e => {
+    if (_parkClickHandled) return; /* lyr-mun-parks already handled this click */
     if (!e.features.length) return;
     _parkClickHandled = true;
     _overlayClickHandled = true;
     const f = e.features[0];
     S.locked = true;
+    clearHovContext();
     showPanel(f.properties, 'Park');
+    showHovContext(f.properties?.fid);
     tip.classList.remove('vis');
   });
 
@@ -1857,6 +1922,7 @@ function setupInteractions() {
     { key: 'pitch',     src: 'src-pitch',     fillId: 'lyr-pitch',          lineId: 'lyr-pitch-line',          label: 'Sports Pitch' },
     { key: 'libraries', src: 'src-libraries', fillId: 'lyr-libraries',      lineId: 'lyr-libraries-line',      label: 'Library' },
     { key: 'malls',     src: 'src-malls',     fillId: 'lyr-malls',          lineId: 'lyr-malls-line',          label: 'Mall' },
+    { key: 'amenities', src: 'src-amenities', fillId: 'lyr-amenities',      lineId: 'lyr-amenities-line',      label: 'Amenity' },
   ];
   const _poiState = {};
   POI_CFG.forEach(cfg => {
@@ -1951,6 +2017,8 @@ function setupInteractions() {
     _parkClickHandled = true;
     const id = e.features[0].id;
     const munName = e.features[0].properties?.Mun_Name || e.features[0].properties?.name;
+    /* Clear any selected park and its vicinity ring whenever a city is clicked */
+    clearSel();
     /* Deselect if clicking same municipality */
     if (_munSelId === id) {
       try { map.setFeatureState({ source: 'src-munic', id: _munSelId }, { selected: false }); } catch(_) {}
@@ -1991,6 +2059,7 @@ function setupInteractions() {
     _parkClickHandled = true;
     _overlayClickHandled = true;
     S.locked = true;
+    clearHovContext();
     showPanel(e.features[0].properties, 'Park');
     showHovContext(e.features[0].properties?.fid);
   });
@@ -2038,8 +2107,8 @@ function _applyMunicPaint() {
   if (!map.getLayer('lyr-munic-fill') || !map.getLayer('lyr-munic-line')) return;
   map.setPaintProperty('lyr-munic-fill', 'fill-color', '#3a7fbf');
   map.setPaintProperty('lyr-munic-fill', 'fill-opacity', ['case',
-    ['boolean', ['feature-state', 'selected'], false], 0.30,
-    0.20
+    ['boolean', ['feature-state', 'selected'], false], 0.10,
+    0.05
   ]);
   map.setPaintProperty('lyr-munic-line', 'line-color', ['case',
     ['boolean', ['feature-state', 'selected'], false], '#5aaff5',
@@ -2051,6 +2120,15 @@ function _applyMunicPaint() {
     ['boolean', ['feature-state', 'hover'], false], 2.0,
     1.0
   ]);
+  /* Widen the casing to match city-scale line widths */
+  if (map.getLayer('lyr-munic-line-casing')) {
+    const sat = S.bm === 'satellite';
+    map.setPaintProperty('lyr-munic-line-casing', 'line-width', ['case',
+      ['boolean', ['feature-state', 'selected'], false], sat ? 3 : 6,
+      ['boolean', ['feature-state', 'hover'], false], sat ? 2 : 4.5,
+      sat ? 1.5 : 3
+    ]);
+  }
 }
 
 function _applyParksMunicPaint() {
@@ -2059,12 +2137,39 @@ function _applyParksMunicPaint() {
   map.setPaintProperty('lyr-munic-fill', 'fill-opacity', 1);
   map.setPaintProperty('lyr-munic-line', 'line-color', 'rgba(90,90,90,0.3)');
   map.setPaintProperty('lyr-munic-line', 'line-width', 1.0);
+  /* Slim the casing back down for parks scale */
+  if (map.getLayer('lyr-munic-line-casing')) {
+    const sat = S.bm === 'satellite';
+    map.setPaintProperty('lyr-munic-line-casing', 'line-width', ['case',
+      ['boolean', ['feature-state', 'selected'], false], sat ? 2.5 : 4,
+      ['boolean', ['feature-state', 'hover'], false], sat ? 2 : 3,
+      sat ? 1 : 2
+    ]);
+  }
 }
+
+const _SCALE_DESC = {
+  parks: {
+    title: 'Parks Scale',
+    body: 'Individual parks mapped across the Greater Manila Area. Hover a park to preview its attributes, or click to lock and explore full details including tree cover, vicinity context, and city comparisons.'
+  },
+  munic: {
+    title: 'City Scale',
+    body: 'Park data aggregated per city or municipality. Hover a city to see its parks and total green space, or click to lock the view and compare against all cities in the region.'
+  }
+};
 
 function switchScale(scale) {
   _scale = scale;
   document.querySelectorAll('.scale-btn').forEach(b =>
     b.classList.toggle('on', b.dataset.scale === scale));
+  const desc = _SCALE_DESC[scale];
+  if (desc) {
+    const t = document.getElementById('sd-title');
+    const b = document.getElementById('sd-body');
+    if (t) t.textContent = desc.title;
+    if (b) b.textContent = desc.body;
+  }
 
   const parkLayers = ['lyr-parks-dot', 'lyr-parks-fill', 'lyr-parks-line', 'lyr-parks-lbl'];
 
@@ -2093,31 +2198,27 @@ function switchScale(scale) {
 
 function showMunicPanel(munName) {
   const displayName = toDisplayName(munName);
-  const parks = GD.parks.features.filter(p => p.properties?.Mun_Name === munName);
+  const parkMunName = _MUN_NAME_ALIAS[munName] || munName;
+  const parks = GD.parks.features.filter(p => p.properties?.Mun_Name === parkMunName);
   const count = parks.length;
   const totalArea = parks.reduce((s, p) => s + (+p.properties?.AreaSQM || 0), 0);
   const treePct = parks.filter(p => p.properties?.TreeCover_Percentage != null);
   const avgTree = treePct.length
     ? treePct.reduce((s, p) => s + +p.properties.TreeCover_Percentage, 0) / treePct.length : null;
-  const tempArr = parks.filter(p => p.properties?.Tmean_Celsius != null);
-  const avgTemp = tempArr.length
-    ? tempArr.reduce((s, p) => s + +p.properties.Tmean_Celsius, 0) / tempArr.length : null;
-
   let html = `<div class="prop-layer">${displayName}<div class="pl-sub">City / Municipality</div></div>`;
   html += `<div class="stat-grid">
-    <div class="stat-box"><div class="stat-val">${count}</div><div class="stat-key">Total Parks</div></div>
-    <div class="stat-box"><div class="stat-val">${fmtArea(totalArea)}</div><div class="stat-key">Total Park Area</div></div>
-    ${avgTree != null ? `<div class="stat-box"><div class="stat-val">${fmtPct(avgTree)}</div><div class="stat-key">Avg Tree Cover</div></div>` : ''}
-    ${avgTemp != null ? `<div class="stat-box"><div class="stat-val">${(+avgTemp).toFixed(1)} °C</div><div class="stat-key">Avg Park Temp</div></div>` : ''}
+    <div class="stat-box"><div class="stat-val">${count}</div><div class="stat-key">Total Parks ${qmark('Number of park features mapped within this city or municipality.')}</div></div>
+    <div class="stat-box"><div class="stat-val">${fmtArea(totalArea)}</div><div class="stat-key">Total Park Area ${qmark('Sum of all park footprints in square meters within this city.')}</div></div>
+    ${avgTree != null ? `<div class="stat-box"><div class="stat-val">${fmtPct(avgTree)}</div><div class="stat-key">Average Park Tree Cover % ${qmark('Mean tree canopy cover percentage across all parks in this city.')}</div></div>` : ''}
   </div>`;
 
   /* Park area vs all cities distribution */
   if (PARK_STATS?.munArea) {
-    html += mChart(PARK_STATS.munArea, totalArea, 'Total Park Area vs All Cities');
+    html += mChart(PARK_STATS.munArea, totalArea, `Total Park Area vs All Cities ${qmark('Comparing this city\'s total green space against all cities and municipalities in the region.')}`, v => (v >= 1000 ? v.toLocaleString('en', {maximumFractionDigits:0}) : v.toFixed(0)) + ' m²');
   }
 
   if (avgTree != null && PARK_STATS?.tree) {
-    html += mChart(PARK_STATS.tree, avgTree * 100, 'Avg Tree Cover vs All Cities');
+    html += mChart(PARK_STATS.tree, avgTree * 100, `Average Park Tree Cover % vs All Cities ${qmark('Comparing this city\'s average park tree cover against all others in the region.')}`, v => v.toFixed(1) + '%');
   }
 
   if (parks.length) {
@@ -2218,9 +2319,10 @@ function populateMunicLayers(munName, munPolygon) {
     const fc = data();
     if (!fc?.features) return;
     if (munAttr) {
-      /* Fast path: direct property match */
+      /* Fast path: match against both raw munName and alias (covers "MANILA" vs "CITY OF MANILA") */
       fc.features.forEach(f => {
-        if (f.properties?.[munAttr] === munName)
+        const v = f.properties?.[munAttr];
+        if (v === munName || v === parkMunName)
           poiFeats.push({ ...f, properties: { ...f.properties, _type: key } });
       });
     } else {
@@ -2261,34 +2363,43 @@ document.querySelectorAll('.scale-btn').forEach(b =>
 /* ════════════════════════════════════════════════════════════
    BASEMAP SWITCHER
 ════════════════════════════════════════════════════════════ */
-/* Single persistent handler — fires for every basemap switch, never stacks */
-let _bmSwitchPending = false;
-map.on('style.load', () => {
-  if (!_bmSwitchPending) return;
-  _bmSwitchPending = false;
-  Object.entries(GD).forEach(([key, data]) => {
-    map.addSource('src-' + key, { type: 'geojson', data, generateId: true });
-  });
-  if (CENTROID_FC) map.addSource('src-park-centroids', { type: 'geojson', data: CENTROID_FC, generateId: true });
+let _bmRestoreTimer = null;
+
+function _restoreLayersAfterStyleChange() {
+  /* Guard: don't double-restore if sources already exist */
+  if (map.getSource('src-parks')) return;
+  /* Poll until the new style is fully loaded before adding sources/layers */
+  if (!map.isStyleLoaded()) {
+    _bmRestoreTimer = setTimeout(_restoreLayersAfterStyleChange, 100);
+    return;
+  }
+  _bmRestoreTimer = null;
   const emptyFC = { type: 'FeatureCollection', features: [] };
-  map.addSource('src-hov-vicinity',  { type: 'geojson', data: emptyFC });
-  map.addSource('src-mun-parks',     { type: 'geojson', data: emptyFC, generateId: true });
-  map.addSource('src-mun-parks-dot', { type: 'geojson', data: emptyFC });
-  map.addSource('src-mun-poi',       { type: 'geojson', data: emptyFC });
+  Object.entries(GD).forEach(([key, data]) => {
+    try { map.addSource('src-' + key, { type: 'geojson', data, generateId: true }); } catch (_) {}
+  });
+  if (CENTROID_FC) try { map.addSource('src-park-centroids', { type: 'geojson', data: CENTROID_FC, generateId: true }); } catch (_) {}
+  try { map.addSource('src-hov-vicinity',  { type: 'geojson', data: emptyFC }); } catch (_) {}
+  try { map.addSource('src-mun-parks',     { type: 'geojson', data: emptyFC, generateId: true }); } catch (_) {}
+  try { map.addSource('src-mun-parks-dot', { type: 'geojson', data: emptyFC }); } catch (_) {}
+  try { map.addSource('src-mun-poi',       { type: 'geojson', data: emptyFC }); } catch (_) {}
   addLayersAfterStyleChange();
-});
+}
 
 document.querySelectorAll('[data-bm]').forEach(b => {
   b.addEventListener('click', () => {
     if (S.bm === b.dataset.bm) return; /* already active — no-op */
     S.bm = b.dataset.bm;
-    _bmSwitchPending = true;
     document.querySelectorAll('[data-bm]').forEach(x => x.classList.toggle('on', x === b));
+    /* Cancel any in-flight restore from a previous switch */
+    if (_bmRestoreTimer) { clearTimeout(_bmRestoreTimer); _bmRestoreTimer = null; }
     if (b.dataset.bm === 'satellite') {
       map.setStyle(SAT_STYLE);
     } else {
       map.setStyle(BM_STYLES[b.dataset.bm] || BM_STYLES.positron);
     }
+    /* Start polling after a short delay to let setStyle clear the old sources first */
+    _bmRestoreTimer = setTimeout(_restoreLayersAfterStyleChange, 50);
   });
 });
 
@@ -2297,73 +2408,124 @@ function addLayersAfterStyleChange() {
     const tog = document.getElementById('tog-' + id);
     return (tog && tog.checked) ? 'visible' : 'none';
   };
-  map.addLayer({ id: 'lyr-water', type: 'fill', source: 'src-water', layout: { visibility: vis('water') },
+  const addL = spec => { try { map.addLayer(spec); } catch (_) {} };
+  addL({ id: 'lyr-water', type: 'fill', source: 'src-water', layout: { visibility: vis('water') },
     paint: { 'fill-color': '#a8d4ef', 'fill-opacity': 0.7, 'fill-outline-color': 'rgba(40,140,210,0.5)' } });
-  map.addLayer({ id: 'lyr-prov', type: 'line', source: 'src-prov', layout: { visibility: 'visible' },
+  addL({ id: 'lyr-prov', type: 'line', source: 'src-prov', layout: { visibility: 'visible' },
     paint: { 'line-color': 'rgba(100,100,100,0.3)', 'line-width': 1.5 } });
-  map.addLayer({ id: 'lyr-munic-fill', type: 'fill', source: 'src-munic', layout: { visibility: 'visible' },
+  addL({ id: 'lyr-munic-fill', type: 'fill', source: 'src-munic', layout: { visibility: 'visible' },
     paint: { 'fill-color': 'rgba(100,100,100,0.03)', 'fill-opacity': 1 } });
-  map.addLayer({ id: 'lyr-munic-line', type: 'line', source: 'src-munic', layout: { visibility: 'visible' },
+  { const sat = S.bm === 'satellite';
+    addL({ id: 'lyr-munic-line-casing', type: 'line', source: 'src-munic',
+      layout: { visibility: (S.bm === 'osm' || S.bm === 'satellite') ? 'visible' : 'none' },
+      paint: { 'line-color': 'rgba(255,255,255,0.88)',
+        'line-width': sat
+          ? ['case',['boolean',['feature-state','selected'],false],3,['boolean',['feature-state','hover'],false],2,1.5]
+          : ['case',['boolean',['feature-state','selected'],false],6,['boolean',['feature-state','hover'],false],4,3] } }); }
+  addL({ id: 'lyr-munic-line', type: 'line', source: 'src-munic', layout: { visibility: 'visible' },
     paint: { 'line-color': 'rgba(90,90,90,0.3)', 'line-width': 1.0 } });
-  map.addLayer({ id: 'lyr-munic-lbl', type: 'symbol', source: 'src-munic', minzoom: 10,
+  addL({ id: 'lyr-munic-lbl', type: 'symbol', source: 'src-munic', minzoom: 10, maxzoom: 12,
     layout: { visibility: 'visible',
       'text-field': ['coalesce', ['get', 'Mun_Name'], ['get', 'name'], ''],
       'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 14, 12],
       'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], 'text-anchor': 'center' },
     paint: { 'text-color': 'rgba(80,80,80,0.7)', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1.5 } });
-  map.addLayer({ id: 'lyr-cemetery', type: 'fill', source: 'src-cemetery', layout: { visibility: vis('cemetery') },
+  addL({ id: 'lyr-cemetery', type: 'fill', source: 'src-cemetery', layout: { visibility: vis('cemetery') },
     paint: { 'fill-color': '#9b7d9b', 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.70,0.50], 'fill-outline-color': 'rgba(0,0,0,0)' } });
-  map.addLayer({ id: 'lyr-cemetery-line', type: 'line', source: 'src-cemetery', layout: { visibility: vis('cemetery') },
+  addL({ id: 'lyr-cemetery-line', type: 'line', source: 'src-cemetery', layout: { visibility: vis('cemetery') },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#c09ec0',['boolean',['feature-state','hover'],false],'#c09ec0','rgba(122,94,122,0.4)'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.0,0.6] } });
-  map.addLayer({ id: 'lyr-golf', type: 'fill', source: 'src-golf', layout: { visibility: vis('golf') },
+  addL({ id: 'lyr-golf', type: 'fill', source: 'src-golf', layout: { visibility: vis('golf') },
     paint: { 'fill-color': '#6db33f', 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.70,0.45], 'fill-outline-color': 'rgba(0,0,0,0)' } });
-  map.addLayer({ id: 'lyr-golf-line', type: 'line', source: 'src-golf', layout: { visibility: vis('golf') },
+  addL({ id: 'lyr-golf-line', type: 'line', source: 'src-golf', layout: { visibility: vis('golf') },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#90e050',['boolean',['feature-state','hover'],false],'#90e050','rgba(79,143,37,0.4)'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.0,0.6] } });
-  map.addLayer({ id: 'lyr-pitch', type: 'fill', source: 'src-pitch', layout: { visibility: vis('pitch') },
+  addL({ id: 'lyr-pitch', type: 'fill', source: 'src-pitch', layout: { visibility: vis('pitch') },
     paint: { 'fill-color': '#7ec8c8', 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.70,0.50], 'fill-outline-color': 'rgba(0,0,0,0)' } });
-  map.addLayer({ id: 'lyr-pitch-line', type: 'line', source: 'src-pitch', layout: { visibility: vis('pitch') },
+  addL({ id: 'lyr-pitch-line', type: 'line', source: 'src-pitch', layout: { visibility: vis('pitch') },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#9ee8e8',['boolean',['feature-state','hover'],false],'#9ee8e8','rgba(91,168,168,0.4)'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.0,0.6] } });
-  map.addLayer({ id: 'lyr-vicinity', type: 'fill', source: 'src-vicinity', layout: { visibility: 'visible' },
+  addL({ id: 'lyr-vicinity', type: 'fill', source: 'src-vicinity', layout: { visibility: 'none' },
     paint: { 'fill-color': '#1a9e6e', 'fill-opacity': 0.10, 'fill-outline-color': 'rgba(26,158,110,0.3)' } });
-  map.addLayer({ id: 'lyr-vicinity-line', type: 'line', source: 'src-vicinity', layout: { visibility: 'visible' },
+  addL({ id: 'lyr-vicinity-line', type: 'line', source: 'src-vicinity', layout: { visibility: 'none' },
     paint: { 'line-color': 'rgba(26,158,110,0.4)', 'line-width': 1, 'line-dasharray': [3, 2] } });
-  map.addLayer({ id: 'lyr-parks-dot', type: 'circle', source: 'src-park-centroids', maxzoom: 13.5,
+  addL({ id: 'lyr-parks-dot', type: 'circle', source: 'src-park-centroids', maxzoom: 13.5,
     layout: { visibility: 'visible' },
     paint: { 'circle-radius': ['interpolate',['linear'],['zoom'],5,2,10,3.5,13,5], 'circle-color': '#1a9e6e', 'circle-stroke-color': 'rgba(255,255,255,0.75)', 'circle-stroke-width': 1, 'circle-opacity': 0.85 } });
-  map.addLayer({ id: 'lyr-parks-fill', type: 'fill', source: 'src-parks', layout: { visibility: 'visible' },
+  addL({ id: 'lyr-parks-fill', type: 'fill', source: 'src-parks', layout: { visibility: 'visible' },
     paint: { 'fill-color': ['case',['boolean',['feature-state','selected'],false],'#39ff14','#1a9e6e'], 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.90,0.60] } });
-  map.addLayer({ id: 'lyr-parks-line', type: 'line', source: 'src-parks', layout: { visibility: 'visible' },
+  addL({ id: 'lyr-parks-line', type: 'line', source: 'src-parks', layout: { visibility: 'visible' },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#39ff14',['boolean',['feature-state','hover'],false],'#2dcf8e','#1a9e6e'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.5,0.8] } });
-  map.addLayer({ id: 'lyr-parks-lbl', type: 'symbol', source: 'src-parks', minzoom: 13,
+  addL({ id: 'lyr-parks-lbl', type: 'symbol', source: 'src-parks', minzoom: 13,
     layout: { visibility: document.getElementById('tog-park-labels').checked ? 'visible' : 'none',
       'text-field': ['coalesce', ['get', 'name'], ''], 'text-size': ['interpolate',['linear'],['zoom'],13,9,17,13],
       'text-font': ['Open Sans Semibold','Arial Unicode MS Regular'], 'text-anchor': 'center', 'text-max-width': 8 },
     paint: { 'text-color': 'rgba(0,60,30,0.88)', 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.8 } });
-  map.addLayer({ id: 'lyr-amenities', type: 'fill', source: 'src-amenities', layout: { visibility: vis('amenities') },
+  addL({ id: 'lyr-amenities', type: 'fill', source: 'src-amenities', layout: { visibility: vis('amenities') },
     paint: { 'fill-color': '#f5a623', 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.70,0.45], 'fill-outline-color': 'rgba(0,0,0,0)' } });
-  map.addLayer({ id: 'lyr-amenities-line', type: 'line', source: 'src-amenities', layout: { visibility: vis('amenities') },
+  addL({ id: 'lyr-amenities-line', type: 'line', source: 'src-amenities', layout: { visibility: vis('amenities') },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#ffcc50',['boolean',['feature-state','hover'],false],'#ffcc50','rgba(197,126,10,0.4)'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.0,0.6] } });
-  map.addLayer({ id: 'lyr-libraries', type: 'fill', source: 'src-libraries', layout: { visibility: vis('libraries') },
+  addL({ id: 'lyr-libraries', type: 'fill', source: 'src-libraries', layout: { visibility: vis('libraries') },
     paint: { 'fill-color': '#4a90d9', 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.75,0.55], 'fill-outline-color': 'rgba(0,0,0,0)' } });
-  map.addLayer({ id: 'lyr-libraries-line', type: 'line', source: 'src-libraries', layout: { visibility: vis('libraries') },
+  addL({ id: 'lyr-libraries-line', type: 'line', source: 'src-libraries', layout: { visibility: vis('libraries') },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#6ab0ff',['boolean',['feature-state','hover'],false],'#6ab0ff','rgba(46,111,173,0.4)'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.0,0.6] } });
-  map.addLayer({ id: 'lyr-malls', type: 'fill', source: 'src-malls', layout: { visibility: vis('malls') },
+  addL({ id: 'lyr-malls', type: 'fill', source: 'src-malls', layout: { visibility: vis('malls') },
     paint: { 'fill-color': '#e05a6a', 'fill-opacity': ['case',['boolean',['feature-state','selected'],false],0.70,0.50], 'fill-outline-color': 'rgba(0,0,0,0)' } });
-  map.addLayer({ id: 'lyr-malls-line', type: 'line', source: 'src-malls', layout: { visibility: vis('malls') },
+  addL({ id: 'lyr-malls-line', type: 'line', source: 'src-malls', layout: { visibility: vis('malls') },
     paint: { 'line-color': ['case',['boolean',['feature-state','selected'],false],'#ff7a8a',['boolean',['feature-state','hover'],false],'#ff7a8a','rgba(192,58,74,0.4)'], 'line-width': ['case',['boolean',['feature-state','selected'],false],2.5,['boolean',['feature-state','hover'],false],2.0,0.6] } });
-  /* Re-add dynamic hover layers (sources added in style.load handler) */
-  map.addLayer({ id: 'lyr-hov-vicinity', type: 'fill', source: 'src-hov-vicinity', paint: { 'fill-color': '#1a9e6e', 'fill-opacity': 0.12 } });
-  map.addLayer({ id: 'lyr-hov-vicinity-line', type: 'line', source: 'src-hov-vicinity', paint: { 'line-color': 'rgba(26,158,110,0.7)', 'line-width': 1.5, 'line-dasharray': [4, 2] } });
+  /* Re-add dynamic hover layers */
+  addL({ id: 'lyr-hov-vicinity', type: 'fill', source: 'src-hov-vicinity', paint: { 'fill-color': '#1a9e6e', 'fill-opacity': 0.12 } });
+  addL({ id: 'lyr-hov-vicinity-line', type: 'line', source: 'src-hov-vicinity', paint: { 'line-color': 'rgba(26,158,110,0.7)', 'line-width': 1.5, 'line-dasharray': [4, 2] } });
   /* Municipality overlay layers */
   addMunOverlayLayers();
   /* Restore scale-dependent visibility */
   switchScale(_scale);
+  /* Hide basemap sub-city labels (barangay-level) that appear at high zoom */
+  hideBasemapLocalLabels();
+}
+
+function hideBasemapLocalLabels() {
+  try {
+    const style = map.getStyle();
+    if (!style) return;
+    const geojsonSrcs = new Set(
+      Object.entries(style.sources)
+        .filter(([, s]) => s.type === 'geojson')
+        .map(([k]) => k)
+    );
+    style.layers.forEach(lyr => {
+      if (lyr.type !== 'symbol') return;
+      if (geojsonSrcs.has(lyr.source)) return; /* skip user GeoJSON layers */
+      if ((lyr.minzoom ?? 0) >= 12) {
+        try { map.setLayoutProperty(lyr.id, 'visibility', 'none'); } catch (_) {}
+      }
+    });
+  } catch (_) {}
 }
 
 
 /* ════════════════════════════════════════════════════════════
    TOGGLE SWITCHES
 ════════════════════════════════════════════════════════════ */
+/* ── Q-TIP ── */
+function qmark(tip) { if (!tip) return ''; return `<span class="qm" data-tip="${tip.replace(/"/g,"'")}">?</span>`; }
+(function() {
+  const QT = document.getElementById('q-tip');
+  if (!QT) return;
+  function posQT(cx, cy) {
+    const w = window.innerWidth, h = window.innerHeight;
+    const tw = QT.offsetWidth || 220, th = QT.offsetHeight || 60;
+    QT.style.left = (cx + 12 + tw > w ? cx - tw - 8 : cx + 12) + 'px';
+    QT.style.top  = (cy + th + 12 > h ? cy - th - 6  : cy + 10) + 'px';
+  }
+  document.addEventListener('mouseover', e => {
+    const q = e.target.closest('.qm');
+    if (!q) { QT.style.display = 'none'; return; }
+    QT.textContent = q.dataset.tip || '';
+    QT.style.display = 'block';
+    posQT(e.clientX, e.clientY);
+  });
+  document.addEventListener('mousemove', e => { if (e.target.closest('.qm')) posQT(e.clientX, e.clientY); });
+  document.addEventListener('mouseout',  e => { if (e.target.closest('.qm')) QT.style.display = 'none'; });
+})();
+
 function setupUI() {
   const LAYER_MAP = {
     'tog-golf':      ['lyr-golf', 'lyr-golf-line'],
