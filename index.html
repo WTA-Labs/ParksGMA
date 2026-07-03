@@ -525,8 +525,15 @@ html, body {
   color: var(--txt-mid); margin-top: 2px; font-family: var(--f-mono); }
 .chart-cur { font-size: .64rem; color: var(--txt-mid); margin-top: 3px; }
 .chart-cur strong { color: var(--acc); font-weight: 700; }
-.pct-bar-wrap { height: 4px; background: rgba(0,0,0,.08); border-radius: 2px; margin-top: 4px; overflow: hidden; }
-.pct-bar-fill { height: 100%; border-radius: 2px; background: var(--acc); transition: width .3s; }
+.pct-bar-outer { margin: 4px 0 6px; padding: 0 14px; }
+.pct-bar-title { display: flex; align-items: center; gap: 4px; margin-bottom: 5px; font-family: var(--f-mono); font-size: .58rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--acc); }
+.pct-bar-track { position: relative; height: 22px; background: rgba(0,0,0,.07); border-radius: 6px; overflow: hidden; border: 1px solid rgba(0,0,0,.09); }
+.pct-bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--acc); border-radius: 6px; transition: width .4s ease; }
+.pct-bar-lbl { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; align-items: center; padding-left: 9px;
+  font-size: .71rem; font-weight: 700; font-family: var(--f-mono);
+  /* text switches from accent to white when the fill covers it */
+  background: linear-gradient(to right, #fff var(--w,0%), var(--acc) var(--w,0%));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
 /* ══ HOVER TOOLTIP ═══════════════════════════════════════ */
 #hover-tip {
@@ -1134,17 +1141,19 @@ function computeParkStats() {
     return isFinite(v) && v >= 0 ? v * (scale || 1) : null;
   }).filter(v => v !== null).sort((a, b) => a - b);
 
-  const mkStat = (arr, N = 24) => {
+  const mkStat = (arr, N = 24, clipPct = 1) => {
     if (!arr.length) return null;
-    const min = arr[0], max = arr[arr.length - 1], rng = max - min || 1;
+    const min = arr[0], max = arr[arr.length - 1];
     const mean = arr.reduce((s, v) => s + v, 0) / arr.length;
+    const clipMax = arr[Math.floor(arr.length * clipPct / 100) - 1] || max;
+    const rng = clipMax - min || 1;
     const bins = new Array(N).fill(0);
-    arr.forEach(v => { bins[Math.min(Math.floor(((v - min) / rng) * N), N - 1)]++; });
+    arr.forEach(v => { bins[Math.min(Math.floor(((Math.min(v, clipMax) - min) / rng) * N), N - 1)]++; });
     return { min, max, mean, range: rng, bins, count: arr.length };
   };
 
   PARK_STATS = {
-    area: mkStat(extract('AreaSQM')),
+    area: mkStat(extract('AreaSQM'), 24, 99),
     tree: mkStat(extract('TreeCover_Percentage', 100)),  /* 0-1 → 0-100 */
   };
 
@@ -1163,9 +1172,10 @@ function mChart(stat, curVal, title, fL) {
   if (!fL) fL = v => v.toFixed(2);
   const W = 220, H = 38, N = stat.bins.length, bW = W / N;
   const mx = Math.max(...stat.bins) || 1;
+  const sqrtMx = Math.sqrt(mx);
   const cB = curVal != null ? Math.min(Math.floor(((curVal - stat.min) / stat.range) * N), N - 1) : -1;
   const bars = stat.bins.map((c, i) => {
-    const h = Math.max((c / mx) * H, 1);
+    const h = Math.max((Math.sqrt(c) / sqrtMx) * H, c > 0 ? 1 : 0);
     return `<rect x="${(i * bW + 0.5).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bW - 1).toFixed(1)}" height="${h.toFixed(1)}" fill="${i === cB ? '#1a9e6e' : 'rgba(26,158,110,0.18)'}" rx="1"/>`;
   }).join('');
   let marker = '';
@@ -1182,9 +1192,11 @@ function mChart(stat, curVal, title, fL) {
 }
 
 /* Percentage bar (0-100 value) */
-function pctBar(pct, color) {
+function pctBar(pct, color, title, tip) {
   const w = Math.max(0, Math.min(100, +pct || 0));
-  return `<div class="pct-bar-wrap"><div class="pct-bar-fill" style="width:${w}%;${color ? 'background:' + color : ''}"></div></div>`;
+  const fill = color ? `background:${color}` : '';
+  const hd = title ? `<div class="pct-bar-title">${title}${tip ? qmark(tip) : ''}</div>` : '';
+  return `<div class="pct-bar-outer">${hd}<div class="pct-bar-track"><div class="pct-bar-fill" style="width:${w}%;${fill}"></div><div class="pct-bar-lbl" style="--w:${w}%">${w.toFixed(1)}%</div></div></div>`;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1612,7 +1624,7 @@ map.on('load', () => {
   /* ── Municipality view: parks + POI overlay ── */
   map.addSource('src-mun-parks',     { type: 'geojson', data: EMPTY_FC, generateId: true });
   map.addSource('src-mun-parks-dot', { type: 'geojson', data: EMPTY_FC });
-  map.addSource('src-mun-poi',       { type: 'geojson', data: EMPTY_FC });
+  map.addSource('src-mun-poi',       { type: 'geojson', data: EMPTY_FC, generateId: true });
   addMunOverlayLayers();
 
   /* Done */
@@ -1650,6 +1662,7 @@ function clearSel() {
   }
   S.sel = { src: null, id: null };
   S.locked = false;
+  if (window._clearMunOvSel) window._clearMunOvSel();
   clearPanel();
   clearHovContext();
 }
@@ -1757,8 +1770,7 @@ function showPanel(props, layerLabel) {
     <div class="prop-row"><span class="prop-key">Area ${qmark('Total park footprint in square meters.')}</span><span class="prop-val">${fmtArea(areaSQM)}</span></div>
     <div class="prop-row"><span class="prop-key">Compactness ${qmark('Shape compactness index (0–1). Values closer to 1 indicate a more circular, compact shape.')}</span><span class="prop-val">${cmp}</span></div>
     <div class="prop-row"><span class="prop-key">Canopy mean ${qmark('Mean canopy cover value derived from remote sensing. Higher values indicate denser tree cover.')}</span><span class="prop-val">${can}</span></div>
-    <div class="prop-row"><span class="prop-key">Park Tree Cover % ${qmark('Percentage of the park\'s area covered by tree canopy.')}</span><span class="prop-val hi">${tree}</span></div>
-    ${treePctV != null ? pctBar(treePctV, '#1a9e6e') : ''}
+    ${treePctV != null ? pctBar(treePctV, '#1a9e6e', 'Park Tree Cover %', 'Percentage of the park\'s area covered by tree canopy.') : ''}
   `;
 
   /* Distribution charts */
@@ -2046,32 +2058,88 @@ function setupInteractions() {
   /* Flag to prevent the underlying lyr-munic-fill click from firing when an overlay feature is clicked */
   let _overlayClickHandled = false;
 
+  /* Overlay feature-state tracking */
+  let _munOvHov = { src: null, id: null };
+  let _munOvSel = { src: null, id: null };
+  function _clearMunOvHov() {
+    if (_munOvHov.id !== null) { try { map.setFeatureState({ source: _munOvHov.src, id: _munOvHov.id }, { hover: false }); } catch(_) {} }
+    _munOvHov = { src: null, id: null };
+  }
+  function _clearMunOvSel() {
+    if (_munOvSel.id !== null) { try { map.setFeatureState({ source: _munOvSel.src, id: _munOvSel.id }, { selected: false }); } catch(_) {} }
+    _munOvSel = { src: null, id: null };
+  }
+  function _setMunOvHov(src, id) {
+    _clearMunOvHov();
+    _munOvHov = { src, id };
+    try { map.setFeatureState({ source: src, id }, { hover: true }); } catch(_) {}
+  }
+  function _setMunOvSel(src, id) {
+    _clearMunOvSel();
+    _munOvSel = { src, id };
+    try { map.setFeatureState({ source: src, id }, { selected: true }); } catch(_) {}
+  }
+  /* Expose so clearMunicLayers can reset overlay highlight too */
+  window._clearMunOvSel = _clearMunOvSel;
+
+  /* Returns true if the locked selection is an overlay feature (park/POI inside city), not a city boundary */
+  const _isMunOvLocked = () => _munOvSel.id !== null;
+
   map.on('mousemove', 'lyr-mun-parks', e => {
     map.getCanvas().style.cursor = 'pointer';
-    if (!S.locked && e.features.length) showHovContext(e.features[0].properties?.fid);
+    if (!e.features.length) return;
+    if (!S.locked || _isMunOvLocked()) {
+      showHovContext(e.features[0].properties?.fid);
+      _setMunOvHov('src-mun-parks', e.features[0].id);
+    }
   });
   map.on('mouseleave', 'lyr-mun-parks', () => {
     map.getCanvas().style.cursor = '';
-    if (!S.locked) clearHovContext();
+    if (!S.locked || _isMunOvLocked()) { clearHovContext(); _clearMunOvHov(); }
   });
   map.on('click', 'lyr-mun-parks', e => {
     if (!e.features.length) return;
     _parkClickHandled = true;
     _overlayClickHandled = true;
+    _clearMunOvHov();
+    /* Toggle off if clicking the already-selected overlay park */
+    if (_munOvSel.src === 'src-mun-parks' && _munOvSel.id === e.features[0].id) {
+      _clearMunOvSel();
+      S.locked = !!_munSelName; /* stay locked only if a city is still selected */
+      clearHovContext();
+      if (_munSelName) showMunicPanel(_munSelName); else clearPanel();
+      return;
+    }
     S.locked = true;
+    _setMunOvSel('src-mun-parks', e.features[0].id);
     clearHovContext();
     showPanel(e.features[0].properties, 'Park');
     showHovContext(e.features[0].properties?.fid);
   });
   Object.entries(POI_LABELS).forEach(([type, label]) => {
     const fillId = 'lyr-mun-poi-' + type;
-    map.on('mousemove', fillId, () => { map.getCanvas().style.cursor = 'pointer'; });
-    map.on('mouseleave', fillId, () => { map.getCanvas().style.cursor = ''; });
+    map.on('mousemove', fillId, e => {
+      map.getCanvas().style.cursor = 'pointer';
+      if ((!S.locked || _isMunOvLocked()) && e.features.length) _setMunOvHov('src-mun-poi', e.features[0].id);
+    });
+    map.on('mouseleave', fillId, () => {
+      map.getCanvas().style.cursor = '';
+      if (!S.locked || _isMunOvLocked()) _clearMunOvHov();
+    });
     map.on('click', fillId, e => {
       if (!e.features.length) return;
       _parkClickHandled = true;
       _overlayClickHandled = true;
+      _clearMunOvHov();
+      /* Toggle off if clicking the already-selected overlay POI */
+      if (_munOvSel.src === 'src-mun-poi' && _munOvSel.id === e.features[0].id) {
+        _clearMunOvSel();
+        S.locked = !!_munSelName;
+        if (_munSelName) showMunicPanel(_munSelName); else clearPanel();
+        return;
+      }
       S.locked = true;
+      _setMunOvSel('src-mun-poi', e.features[0].id);
       showPointPanel(e.features[0].properties, label);
     });
   });
@@ -2257,12 +2325,22 @@ function addMunOverlayLayers() {
     map.addLayer({
       id: 'lyr-mun-poi-' + type, type: 'fill', source: 'src-mun-poi',
       filter: ['==', ['get', '_type'], type],
-      paint: { 'fill-color': color, 'fill-opacity': 0.35 }
+      paint: {
+        'fill-color': color,
+        'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.85,
+                                 ['boolean', ['feature-state', 'hover'],    false], 0.60, 0.35]
+      }
     });
     map.addLayer({
       id: 'lyr-mun-poi-' + type + '-line', type: 'line', source: 'src-mun-poi',
       filter: ['==', ['get', '_type'], type],
-      paint: { 'line-color': color, 'line-width': 1, 'line-opacity': 0.60 }
+      paint: {
+        'line-color': color,
+        'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 2.5,
+                                ['boolean', ['feature-state', 'hover'],    false], 1.8, 1],
+        'line-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 1,
+                                  ['boolean', ['feature-state', 'hover'],    false], 0.90, 0.60]
+      }
     });
   });
   /* Parks drawn on top at full opacity */
@@ -2274,9 +2352,19 @@ function addMunOverlayLayers() {
     }
   });
   map.addLayer({ id: 'lyr-mun-parks', type: 'fill', source: 'src-mun-parks',
-    paint: { 'fill-color': '#1a9e6e', 'fill-opacity': 0.80 } });
+    paint: {
+      'fill-color': '#1a9e6e',
+      'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 1.0,
+                                ['boolean', ['feature-state', 'hover'],    false], 0.90, 0.80]
+    }
+  });
   map.addLayer({ id: 'lyr-mun-parks-line', type: 'line', source: 'src-mun-parks',
-    paint: { 'line-color': '#1a9e6e', 'line-width': 1.2 } });
+    paint: {
+      'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#fff', '#1a9e6e'],
+      'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 2.5,
+                              ['boolean', ['feature-state', 'hover'],    false], 1.8, 1.2]
+    }
+  });
   map.addLayer({ id: 'lyr-mun-parks-lbl', type: 'symbol', source: 'src-mun-parks', minzoom: 12,
     layout: { 'text-field': ['coalesce', ['get', 'name'], ''], 'text-size': 10,
       'text-font': ['Open Sans Semibold', 'Arial Unicode MS Regular'],
@@ -2349,6 +2437,7 @@ function populateMunicLayers(munName, munPolygon) {
 }
 
 function clearMunicLayers() {
+  if (window._clearMunOvSel) window._clearMunOvSel();
   const empty = { type: 'FeatureCollection', features: [] };
   if (map.getSource('src-mun-parks'))     map.getSource('src-mun-parks').setData(empty);
   if (map.getSource('src-mun-parks-dot')) map.getSource('src-mun-parks-dot').setData(empty);
@@ -2382,7 +2471,7 @@ function _restoreLayersAfterStyleChange() {
   try { map.addSource('src-hov-vicinity',  { type: 'geojson', data: emptyFC }); } catch (_) {}
   try { map.addSource('src-mun-parks',     { type: 'geojson', data: emptyFC, generateId: true }); } catch (_) {}
   try { map.addSource('src-mun-parks-dot', { type: 'geojson', data: emptyFC }); } catch (_) {}
-  try { map.addSource('src-mun-poi',       { type: 'geojson', data: emptyFC }); } catch (_) {}
+  try { map.addSource('src-mun-poi',       { type: 'geojson', data: emptyFC, generateId: true }); } catch (_) {}
   addLayersAfterStyleChange();
 }
 
